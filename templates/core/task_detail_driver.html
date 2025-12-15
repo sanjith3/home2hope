@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Task Details - Home 2 Hope{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Task #{{ task.id }}</h4>
+        <span class="badge bg-{{ task.status|lower }} fs-6">{{ task.get_status_display }}</span>
+    </div>
+    <div class="card-body">
+        {% if task.is_urgent %}
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i> This task is marked as URGENT.
+        </div>
+        {% endif %}
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 class="text-muted">Donor Details</h5>
+                <p class="fs-5 fw-bold mb-1">{{ task.donor_name }}</p>
+                <p class="mb-1"><a href="tel:{{ task.phone_numbers }}" class="text-decoration-none"><i
+                            class="bi bi-telephone"></i> {{ task.phone_numbers }}</a></p>
+                <p class="mb-3"><i class="bi bi-geo-alt"></i> {{ task.address }}</p>
+
+                {% if task.location_link %}
+                <a href="{{ task.location_link }}" target="_blank" class="btn btn-outline-primary mb-3">
+                    <i class="bi bi-map"></i> Open Location in Maps
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h5 class="text-muted">Task Info</h5>
+                <ul class="list-unstyled">
+                    <li><strong>Category:</strong> {{ task.get_category_display }}</li>
+                    <li><strong>Created:</strong> {{ task.created_at|date:"M d, Y H:i" }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="border-top pt-3">
+            {% if task.status == 'ASSIGNED' %}
+            <form method="post" id="startTaskForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="start_task">
+                <input type="hidden" name="latitude" id="id_latitude">
+                <input type="hidden" name="longitude" id="id_longitude">
+
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="btnStart">
+                    <i class="bi bi-play-circle"></i> Start Task
+                </button>
+                <div id="geoStatus" class="form-text text-center mt-2"></div>
+            </form>
+            {% elif task.status == 'IN_PROGRESS' %}
+            <a href="{% url 'task_complete' task.pk %}" class="btn btn-success btn-lg w-100">
+                <i class="bi bi-check-circle"></i> Go to Completion Form
+            </a>
+            {% elif task.status == 'COMPLETED' %}
+            <div class="alert alert-success text-center">
+                Task Completed. <a href="{% url 'receipt_view' task.pk %}">View Receipt</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('startTaskForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnStart');
+        const status = document.getElementById('geoStatus');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Getting Location...';
+        status.textContent = "Requesting location access for logging...";
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                document.getElementById('id_latitude').value = position.coords.latitude;
+                document.getElementById('id_longitude').value = position.coords.longitude;
+                status.textContent = "Location acquired. Starting task...";
+                e.target.submit();
+            }, function (error) {
+                console.error("Geolocation error:", error);
+                status.textContent = "Could not get location. Starting anyway...";
+                // Submit anyway even if location fails (or you could block it)
+                e.target.submit();
+            });
+        } else {
+            status.textContent = "Geolocation not supported. Starting task...";
+            e.target.submit();
+        }
+    });
+</script>
+{% endblock %}

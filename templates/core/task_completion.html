@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Complete Task - Home 2 Hope{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Complete Task #{{ task.id }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="completeTaskForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="latitude" id="id_latitude">
+                    <input type="hidden" name="longitude" id="id_longitude">
+
+                    <h5 class="mb-3">1. Items Collected</h5>
+                    <div id="item-formset">
+                        {{ item_formset.management_form }}
+                        {% for form in item_formset %}
+                        <div class="item-form-row row mb-2 g-2 align-items-end">
+                            <div class="col-md-5">{{ form.category.label_tag }} {{ form.category }}</div>
+                            <div class="col-md-3">{{ form.quantity.label_tag }} {{ form.quantity }}</div>
+                            <div class="col-md-3">{{ form.condition.label_tag }} {{ form.condition }}</div>
+                            <div class="col-md-1">
+                                {% if item_formset.can_delete %}
+                                <div class="form-check pt-4">
+                                    {{ form.DELETE }} Delete
+                                </div>
+                                {% endif %}
+                            </div>
+                            {{ form.id }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Simplified: Instruct user to fill rows. For advanced usage, we'd need JS to clone rows. 
+                         For now, we presented extra=1. -->
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">2. Photos & Proofs</h5>
+                    <div class="alert alert-secondary small">
+                        Allowed types: Items, Donor, Visitor Form, Map location
+                    </div>
+                    <div id="photo-formset">
+                        {{ photo_formset.management_form }}
+                        {% for form in photo_formset %}
+                        <div class="row mb-2 g-2">
+                            <div class="col-md-6">{{ form.image.label_tag }} {{ form.image }}</div>
+                            <div class="col-md-5">{{ form.photo_type.label_tag }} {{ form.photo_type }}</div>
+                            <div class="col-md-1">
+                                {% if photo_formset.can_delete %}
+                                {{ form.DELETE }} Del
+                                {% endif %}
+                            </div>
+                            {{ form.id }}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">3. Checklist</h5>
+                    <div class="mb-3">
+                        <div class="form-check form-switch fs-5">
+                            {{ task_form.visitor_form_filled }}
+                            <label class="form-check-label"
+                                for="{{ task_form.visitor_form_filled.id_for_label }}">Visitor Form Filled?</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch fs-5">
+                            {{ task_form.trust_notice_given }}
+                            <label class="form-check-label" for="{{ task_form.trust_notice_given.id_for_label }}">Trust
+                                Notice/Receipt Given?</label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-5">
+                        <button type="submit" class="btn btn-success btn-lg" id="btnComplete">
+                            <i class="bi bi-check2-circle"></i> Complete Task & Generate Receipt
+                        </button>
+                    </div>
+                    <p id="geoStatus" class="text-center text-muted mt-2"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('completeTaskForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnComplete');
+        const status = document.getElementById('geoStatus');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+        status.textContent = "Capturing final location...";
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                document.getElementById('id_latitude').value = position.coords.latitude;
+                document.getElementById('id_longitude').value = position.coords.longitude;
+                e.target.submit();
+            }, function (error) {
+                console.warn("Geo error", error);
+                e.target.submit();
+            });
+        } else {
+            e.target.submit();
+        }
+    });
+</script>
+{% endblock %}

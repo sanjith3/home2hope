@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Task - Home 2 Hope{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">Create New Collection Task</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="id_donor_name">Donor Name</label>
+                            {{ form.donor_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="id_phone_numbers">Phone Number(s)</label>
+                            {{ form.phone_numbers }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="id_address">Address</label>
+                        {{ form.address }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="id_location_link">Location Link (Google Maps)</label>
+                        {{ form.location_link }}
+                        <div class="form-text">Paste the 'Share' link from Google Maps here.</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="id_category">Category</label>
+                            {{ form.category }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="id_assigned_to">Assign Driver</label>
+                            {{ form.assigned_to }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.is_urgent }}
+                        <label class="form-check-label text-danger fw-bold" for="id_is_urgent">
+                            Mark as Urgent
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

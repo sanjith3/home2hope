@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Task #{{ task.id }} Details - Home 2 Hope{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Task #{{ task.id }} Details</h2>
+    <a href="javascript:history.back()" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Task Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Donor Name</dt>
+                    <dd class="col-sm-8">{{ task.donor_name }}</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        <span
+                            class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% else %}warning text-dark{% endif %}">
+                            {{ task.get_status_display }}
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-4">Category</dt>
+                    <dd class="col-sm-8">{{ task.get_category_display }}</dd>
+
+                    <dt class="col-sm-4">Address</dt>
+                    <dd class="col-sm-8">{{ task.address }}</dd>
+
+                    <dt class="col-sm-4">Phones</dt>
+                    <dd class="col-sm-8">{{ task.phone_numbers }}</dd>
+
+                    <dt class="col-sm-4">Driver</dt>
+                    <dd class="col-sm-8">{{ task.assigned_to.username|default:"Unassigned" }}</dd>
+
+                    <dt class="col-sm-4">Created At</dt>
+                    <dd class="col-sm-8">{{ task.created_at }}</dd>
+
+                    {% if task.completed_at %}
+                    <dt class="col-sm-4">Completed At</dt>
+                    <dd class="col-sm-8">{{ task.completed_at }}</dd>
+                    {% endif %}
+                </dl>
+                {% if task.location_link %}
+                <a href="{{ task.location_link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-geo-alt-fill"></i> Open in Google Maps
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Collected -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Items Collected</h5>
+            </div>
+            <div class="card-body">
+                {% if task.items.exists %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Qty</th>
+                                <th>Condition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in task.items.all %}
+                            <tr>
+                                <td>{{ item.category }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.get_condition_display }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No items recorded yet.</p>
+                {% endif %}
+
+                <h6 class="mt-4">Driver Checklist</h6>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Visitor Form Filled?
+                        {% if task.visitor_form_filled %}
+                        <span class="badge bg-success"><i class="bi bi-check-lg"></i> Yes</span>
+                        {% else %}
+                        <span class="badge bg-secondary">No</span>
+                        {% endif %}
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Trust Notice Given?
+                        {% if task.trust_notice_given %}
+                        <span class="badge bg-success"><i class="bi bi-check-lg"></i> Yes</span>
+                        {% else %}
+                        <span class="badge bg-secondary">No</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Photos -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Uploaded Photos</h5>
+    </div>
+    <div class="card-body">
+        {% if task.photos.exists %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for photo in task.photos.all %}
+            <div class="col">
+                <div class="card h-100">
+                    <a href="{{ photo.image.url }}" target="_blank">
+                        <img src="{{ photo.image.url }}" class="card-img-top" alt="{{ photo.get_photo_type_display }}"
+                            style="height: 200px; object-fit: cover;">
+                    </a>
+                    <div class="card-body p-2 text-center">
+                        <small class="text-muted">{{ photo.get_photo_type_display }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No photos uploaded.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Location Logs (Optional View) -->
+{% if task.location_logs.exists %}
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Location History</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Lat/Long</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in task.location_logs.all %}
+                <tr>
+                    <td>{{ log.get_event_display }}</td>
+                    <td>
+                        <a href="https://www.google.com/maps?q={{ log.latitude }},{{ log.longitude }}" target="_blank">
+                            {{ log.latitude }}, {{ log.longitude }}
+                        </a>
+                    </td>
+                    <td>{{ log.timestamp }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

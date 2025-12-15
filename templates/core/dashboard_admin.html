@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Home 2 Hope{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <a href="{% url 'task_list' %}" class="text-decoration-none">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Tasks</h6>
+                            <h2 class="my-2">{{ total_tasks }}</h2>
+                        </div>
+                        <i class="bi bi-list-task fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 mb-4">
+        <a href="{% url 'task_list' %}?filter=pending" class="text-decoration-none">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Pending</h6>
+                            <h2 class="my-2">{{ pending_tasks }}</h2>
+                        </div>
+                        <i class="bi bi-hourglass-split fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 mb-4">
+        <a href="{% url 'task_list' %}?filter=urgent" class="text-decoration-none">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Urgent</h6>
+                            <h2 class="my-2">{{ urgent_tasks }}</h2>
+                        </div>
+                        <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 mb-4">
+        <a href="{% url 'task_list' %}?filter=completed" class="text-decoration-none">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Completed</h6>
+                            <h2 class="my-2">{{ completed_tasks }}</h2>
+                        </div>
+                        <i class="bi bi-check-circle-fill fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'task_create' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-lg"></i> Create New Task
+                    </a>
+                    <a href="{% url 'driver_list' %}" class="btn btn-outline-dark">
+                        <i class="bi bi-people-fill"></i> Manage Drivers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Recent Activity</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Donor</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in recent_tasks %}
+                        <tr>
+                            <td>{{ task.donor_name }}</td>
+                            <td>
+                                <span
+                                    class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}warning{% else %}secondary{% endif %}">
+                                    {{ task.get_status_display }}
+                                </span>
+                                {% if task.is_urgent %}<span class="badge bg-danger">Urgent</span>{% endif %}
+                            </td>
+                            <td>{{ task.assigned_to.username|default:"Unassigned" }}</td>
+                            <td>{{ task.created_at|date:"M d" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">No tasks yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Task Status Overview</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart" data-pending="{{ pending_tasks }}"
+                    data-completed="{{ completed_tasks }}"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('statusChart');
+        const pending = parseInt(canvas.dataset.pending) || 0;
+        const completed = parseInt(canvas.dataset.completed) || 0;
+
+        const ctx = canvas.getContext('2d');
+        const statusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Completed'],
+                datasets: [{
+                    data: [pending, completed],
+                    backgroundColor: ['#ffc107', '#198754']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

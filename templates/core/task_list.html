@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}All Tasks - Home 2 Hope{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>All Tasks</h2>
+    <a href="{% url 'task_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Task</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-auto">
+                <label for="status" class="visually-hidden">Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="ASSIGNED" {% if is_assigned %}selected{% endif %}>Assigned</option>
+                    <option value="IN_PROGRESS" {% if is_in_progress %}selected{% endif %}>In Progress</option>
+                    <option value="COMPLETED" {% if is_completed %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-secondary">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Donor Name</th>
+                    <th>Status</th>
+                    <th>Driver</th>
+                    <th>Urgent</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>
+                        <a href="{% url 'admin_task_detail' task.pk %}" class="text-decoration-none fw-bold">#{{ task.id
+                            }}</a>
+                    </td>
+                    <td>
+                        <div class="fw-bold">{{ task.donor_name }}</div>
+                        <div class="small text-muted">{{ task.address|truncatechars:30 }}</div>
+                    </td>
+                    <td>
+                        <span
+                            class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% else %}warning text-dark{% endif %}">
+                            {{ task.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if task.assigned_to %}
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-secondary text-white rounded-circle me-2 d-flex justify-content-center align-items-center"
+                                style="width:24px; height:24px; font-size:12px;">
+                                {{ task.assigned_to.username.0|upper }}
+                            </div>
+                            {{ task.assigned_to.username }}
+                        </div>
+                        {% else %}
+                        <span class="text-muted fst-italic">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.is_urgent %}
+                        <span class="badge bg-danger">Urgent</span>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ task.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if task.status == 'COMPLETED' %}
+                        <a href="{% url 'receipt_view' task.pk %}" class="btn btn-sm btn-outline-success"><i
+                                class="bi bi-receipt"></i> Receipt</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">No tasks found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if is_paginated %}
+    <div class="card-footer bg-white">
+        <nav>
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
