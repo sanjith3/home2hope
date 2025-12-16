@@ -38,15 +38,13 @@
                     <th>Driver</th>
                     <th>Urgent</th>
                     <th>Created</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for task in tasks %}
-                <tr>
+                <tr class="clickable-row" data-href="{% url 'admin_task_detail' task.pk %}" style="cursor: pointer;">
                     <td>
-                        <a href="{% url 'admin_task_detail' task.pk %}" class="text-decoration-none fw-bold">#{{ task.id
-                            }}</a>
+                        <span class="fw-bold">#{{ forloop.counter }}</span>
                     </td>
                     <td>
                         <div class="fw-bold">{{ task.donor_name }}</div>
@@ -79,16 +77,10 @@
                         {% endif %}
                     </td>
                     <td>{{ task.created_at|date:"M d, Y" }}</td>
-                    <td>
-                        {% if task.status == 'COMPLETED' %}
-                        <a href="{% url 'receipt_view' task.pk %}" class="btn btn-sm btn-outline-success"><i
-                                class="bi bi-receipt"></i> Receipt</a>
-                        {% endif %}
-                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center py-4 text-muted">No tasks found.</td>
+                    <td colspan="6" class="text-center py-4 text-muted">No tasks found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -117,4 +109,17 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var rows = document.querySelectorAll('.clickable-row');
+        rows.forEach(function (row) {
+            row.addEventListener('click', function () {
+                window.location.href = row.dataset.href;
+            });
+        });
+    });
+</script>
 {% endblock %}
