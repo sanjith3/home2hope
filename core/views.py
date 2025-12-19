@@ -159,6 +159,15 @@ class DriverDashboardView(DriverRequiredMixin, ListView):
         return Task.objects.filter(
             assigned_to=self.request.user
         ).exclude(status='COMPLETED').order_by('-is_urgent', '-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get all tasks for this driver (including completed)
+        all_tasks = Task.objects.filter(assigned_to=self.request.user)
+        context['total_tasks'] = all_tasks.count()
+        context['in_progress_tasks'] = all_tasks.filter(status='IN_PROGRESS').count()
+        context['completed_tasks'] = all_tasks.filter(status='COMPLETED').count()
+        return context
 
 class DriverTaskDetailView(DriverRequiredMixin, DetailView):
     model = Task
