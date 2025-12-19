@@ -1,170 +1,1140 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block title %}Admin Dashboard - Home 2 Hope{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Home 2 Hope</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block content %}
-<div class="row">
-    <div class="col-md-3 mb-4">
-        <a href="{% url 'task_list' %}" class="text-decoration-none">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title mb-0">Total Tasks</h6>
-                            <h2 class="my-2">{{ total_tasks }}</h2>
-                        </div>
-                        <i class="bi bi-list-task fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-3 mb-4">
-        <a href="{% url 'task_list' %}?filter=pending" class="text-decoration-none">
-            <div class="card bg-warning text-dark h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title mb-0">Pending</h6>
-                            <h2 class="my-2">{{ pending_tasks }}</h2>
-                        </div>
-                        <i class="bi bi-hourglass-split fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-3 mb-4">
-        <a href="{% url 'task_list' %}?filter=urgent" class="text-decoration-none">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title mb-0">Urgent</h6>
-                            <h2 class="my-2">{{ urgent_tasks }}</h2>
-                        </div>
-                        <i class="bi bi-exclamation-triangle-fill fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-3 mb-4">
-        <a href="{% url 'task_list' %}?filter=completed" class="text-decoration-none">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title mb-0">Completed</h6>
-                            <h2 class="my-2">{{ completed_tasks }}</h2>
-                        </div>
-                        <i class="bi bi-check-circle-fill fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-</div>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            color: #2d3748;
+        }
 
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'task_create' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-plus-lg"></i> Create New Task
-                    </a>
-                    <a href="{% url 'driver_list' %}" class="btn btn-outline-dark">
-                        <i class="bi bi-people-fill"></i> Manage Drivers
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-8">
-        <div class="card h-100">
-            <div class="card-header bg-white">
-                <h5 class="mb-0">Recent Activity</h5>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Donor</th>
-                            <th>Status</th>
-                            <th>Assigned To</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in recent_tasks %}
-                        <tr>
-                            <td>{{ task.donor_name }}</td>
-                            <td>
-                                <span
-                                    class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}warning{% else %}secondary{% endif %}">
-                                    {{ task.get_status_display }}
-                                </span>
-                                {% if task.is_urgent %}<span class="badge bg-danger">Urgent</span>{% endif %}
-                            </td>
-                            <td>{{ task.assigned_to.username|default:"Unassigned" }}</td>
-                            <td>{{ task.created_at|date:"M d" }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center">No tasks yet.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            padding: 2rem 0;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+            z-index: 1000;
+            overflow-y: auto;
+        }
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h5 class="mb-0">Task Status Overview</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="statusChart" data-pending="{{ pending_tasks }}"
-                    data-completed="{{ completed_tasks }}"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
+        .logo {
+            padding: 0 2rem;
+            margin-bottom: 3rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
 
-{% endblock %}
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
 
-{% block extra_scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const canvas = document.getElementById('statusChart');
-        const pending = parseInt(canvas.dataset.pending) || 0;
-        const completed = parseInt(canvas.dataset.completed) || 0;
+        @keyframes pulse {
 
-        const ctx = canvas.getContext('2d');
-        const statusChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Pending', 'Completed'],
-                datasets: [{
-                    data: [pending, completed],
-                    backgroundColor: ['#ffc107', '#198754']
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
             }
+
+            50% {
+                box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);
+            }
+        }
+
+        .logo-text h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin: 0;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, #3b82f6 0%, #8b5cf6 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: white;
+        }
+
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link i {
+            font-size: 1.25rem;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-text h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-text p {
+            color: #64748b;
+            margin: 0.25rem 0 0 0;
+            font-size: 0.95rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notification-btn {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: ping 2s infinite;
+        }
+
+        @keyframes ping {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease backwards;
+            text-decoration: none;
+            display: block;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card.blue::before {
+            background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
+        }
+
+        .stat-card.purple::before {
+            background: linear-gradient(90deg, #8b5cf6 0%, #d946ef 100%);
+        }
+
+        .stat-card.orange::before {
+            background: linear-gradient(90deg, #f97316 0%, #fbbf24 100%);
+        }
+
+        .stat-card.green::before {
+            background: linear-gradient(90deg, #10b981 0%, #22c55e 100%);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            position: relative;
+        }
+
+        .stat-card.blue .stat-icon {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1d4ed8;
+        }
+
+        .stat-card.purple .stat-icon {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            color: #7c3aed;
+        }
+
+        .stat-card.orange .stat-icon {
+            background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+            color: #c2410c;
+        }
+
+        .stat-card.green .stat-icon {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #047857;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .stat-trend.up {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-trend.down {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-info h6 {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .stat-description {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease backwards;
+        }
+
+        .card-header {
+            padding: 1.75rem 2rem;
+            background: white;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-title i {
+            font-size: 1.5rem;
+            color: #3b82f6;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1.25rem 2rem;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .action-btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        thead th {
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            font-weight: 700;
+            color: #475569;
+            font-size: 0.813rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #f8fafc;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        tbody tr:hover {
+            background: #fafbfc;
+            transform: scale(1.01);
+        }
+
+        tbody td {
+            padding: 1.25rem 1.5rem;
+            color: #334155;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.813rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .badge.success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge.pending {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .badge.danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge i {
+            font-size: 0.75rem;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .progress-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .progress-card:hover {
+            border-color: #e2e8f0;
+            transform: translateY(-4px);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-label {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1.125rem;
+        }
+
+        .progress-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .progress-bar.blue {
+            background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
+        }
+
+        .progress-bar.purple {
+            background: linear-gradient(90deg, #8b5cf6 0%, #d946ef 100%);
+        }
+
+        .progress-bar.green {
+            background: linear-gradient(90deg, #10b981 0%, #22c55e 100%);
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .progress-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .progress-percentage {
+            font-weight: 700;
+            font-size: 1.125rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* Progress Insights Section */
+        .insights-section {
+            margin-top: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            font-size: 1.75rem;
+            color: #3b82f6;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease backwards;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .insight-card:nth-child(1) {
+            animation-delay: 0.5s;
+        }
+
+        .insight-card:nth-child(2) {
+            animation-delay: 0.6s;
+        }
+
+        .insight-card:nth-child(3) {
+            animation-delay: 0.7s;
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .insight-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .insight-icon.blue {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1d4ed8;
+        }
+
+        .insight-icon.orange {
+            background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+            color: #c2410c;
+        }
+
+        .insight-icon.purple {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            color: #7c3aed;
+        }
+
+        .insight-meta h6 {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .insight-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .insight-footer {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .insight-footer span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="bi bi-heart-fill"></i>
+            </div>
+            <div class="logo-text">
+                <h3>Home 2 Hope</h3>
+                <p>Admin Portal</p>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{% url 'dashboard' %}" class="nav-link active">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'task_list' %}" class="nav-link">
+                    <i class="bi bi-list-task"></i>
+                    <span>All Tasks</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'task_create' %}" class="nav-link">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Create Task</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'driver_list' %}" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Manage Drivers</span>
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: 2rem;">
+                <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div class="welcome-text">
+                <h1>Welcome back, {{ user.username }}!</h1>
+                <p>Here's what's happening with your tasks today</p>
+            </div>
+            <div class="user-profile">
+                <button class="notification-btn">
+                    <i class="bi bi-bell"></i>
+                    <span class="notification-badge"></span>
+                </button>
+                <div class="user-avatar">
+                    {{ user.username|first|upper }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <a href="{% url 'task_list' %}" class="stat-card blue">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="bi bi-list-task"></i>
+                    </div>
+                </div>
+                <div class="stat-info">
+                    <h6>Total Tasks</h6>
+                    <div class="stat-value">{{ total_tasks }}</div>
+                    <p class="stat-description">All tasks in system</p>
+                </div>
+            </a>
+
+            <a href="{% url 'task_list' %}?filter=pending" class="stat-card orange">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+                <div class="stat-info">
+                    <h6>Pending Tasks</h6>
+                    <div class="stat-value">{{ pending_tasks }}</div>
+                    <p class="stat-description">Awaiting assignment</p>
+                </div>
+            </a>
+
+            <a href="{% url 'task_list' %}?filter=urgent" class="stat-card purple">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-info">
+                    <h6>Urgent Tasks</h6>
+                    <div class="stat-value">{{ urgent_tasks }}</div>
+                    <p class="stat-description">Requires immediate attention</p>
+                </div>
+            </a>
+
+            <a href="{% url 'task_list' %}?filter=completed" class="stat-card green">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-info">
+                    <h6>Completed</h6>
+                    <div class="stat-value">{{ completed_tasks }}</div>
+                    <p class="stat-description">Successfully finished</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'task_create' %}" class="action-btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Create New Task</span>
+                    </a>
+                    <a href="{% url 'driver_list' %}" class="action-btn btn-secondary">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Manage Drivers</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-clock-history"></i>
+                        Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Donor</th>
+                                <th>Status</th>
+                                <th>Assigned To</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in recent_tasks %}
+                            <tr>
+                                <td>{{ task.donor_name }}</td>
+                                <td>
+                                    <span
+                                        class="badge {% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}warning{% else %}pending{% endif %}">
+                                        {{ task.get_status_display }}
+                                    </span>
+                                    {% if task.is_urgent %}
+                                    <span class="badge danger">
+                                        <i class="bi bi-exclamation-circle-fill"></i>
+                                        Urgent
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ task.assigned_to.username|default:"Unassigned" }}</td>
+                                <td>{{ task.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                                    <i class="bi bi-inbox"
+                                        style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                                    No tasks yet
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Insights -->
+        <div class="insights-section">
+            <h2 class="section-title">
+                <i class="bi bi-graph-up-arrow"></i>
+                Progress Insights
+            </h2>
+
+            <div class="insights-grid">
+                <!-- Completion Rate -->
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon blue">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="insight-meta">
+                            <h6>Completion Rate</h6>
+                            <p class="insight-value">
+                                {% widthratio completed_tasks total_tasks 100 %}%
+                            </p>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar blue"
+                            style="width: {% if total_tasks > 0 %}{% widthratio completed_tasks total_tasks 100 %}{% else %}0{% endif %}%">
+                        </div>
+                    </div>
+                    <div class="insight-footer">
+                        <span>{{ completed_tasks }} of {{ total_tasks }} tasks completed</span>
+                    </div>
+                </div>
+
+                <!-- Pending Tasks -->
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon orange">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                        <div class="insight-meta">
+                            <h6>Tasks In Progress</h6>
+                            <p class="insight-value">
+                                {% widthratio pending_tasks total_tasks 100 %}%
+                            </p>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar orange"
+                            style="width: {% if total_tasks > 0 %}{% widthratio pending_tasks total_tasks 100 %}{% else %}0{% endif %}%">
+                        </div>
+                    </div>
+                    <div class="insight-footer">
+                        <span>{{ pending_tasks }} tasks awaiting completion</span>
+                    </div>
+                </div>
+
+                <!-- Urgent Priority -->
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon purple">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <div class="insight-meta">
+                            <h6>Urgent Priority</h6>
+                            <p class="insight-value">
+                                {% widthratio urgent_tasks total_tasks 100 %}%
+                            </p>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar purple"
+                            style="width: {% if total_tasks > 0 %}{% widthratio urgent_tasks total_tasks 100 %}{% else %}0{% endif %}%">
+                        </div>
+                    </div>
+                    <div class="insight-footer">
+                        <span>{{ urgent_tasks }} tasks need immediate attention</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animate progress bars on load
+        document.addEventListener('DOMContentLoaded', function () {
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
         });
-    });
-</script>
-{% endblock %}
+    </script>
+</body>
+
+</html>
