@@ -3,73 +3,363 @@
 {% block title %}Task #{{ task.id }} Details - Home 2 Hope{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Task #{{ task.id }} Details</h2>
-    <a href="javascript:history.back()" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        --hover-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        --text-dark: #1e293b;
+        --text-secondary: #64748b;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f5f7fa;
+    }
+
+    .page-header {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--card-shadow);
+        animation: slideDown 0.5s ease;
+    }
+
+    .page-title h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        background: var(--primary-gradient);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .btn-back {
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: var(--text-secondary);
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-back:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateX(-2px);
+    }
+
+    .detail-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        border: none;
+        height: 100%;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s ease backwards;
+    }
+
+    .detail-card:hover {
+        box-shadow: var(--hover-shadow);
+    }
+
+    .card-header-styled {
+        background: #f8fafc;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-weight: 600;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-header-styled i {
+        color: #3b82f6;
+        font-size: 1.25rem;
+    }
+
+    .info-list dt {
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-list dd {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        font-size: 1rem;
+    }
+
+    .badge-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.813rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .badge-status.completed {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .badge-status.in_progress {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .badge-status.pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .badge-status.urgent {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .table-details {
+        width: 100%;
+    }
+
+    .table-details th {
+        background: #f8fafc;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.813rem;
+        text-transform: uppercase;
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table-details td {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        color: var(--text-dark);
+    }
+
+    .checklist-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s;
+    }
+
+    .checklist-item:last-child {
+        border-bottom: none;
+    }
+
+    .checklist-item:hover {
+        background: #f8fafc;
+    }
+
+    .photo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .photo-card {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .photo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .photo-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .photo-caption {
+        padding: 0.75rem;
+        background: white;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        text-align: center;
+        font-weight: 500;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-map {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-map:hover {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div class="page-title">
+        <h2><i class="bi bi-clipboard-data"></i> Task Details #{{ task.id }}</h2>
+    </div>
+    <a href="javascript:history.back()" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
 </div>
 
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Task Information</h5>
+<div class="row g-4">
+    <!-- Task Info Column -->
+    <div class="col-lg-6">
+        <div class="detail-card">
+            <div class="card-header-styled">
+                <i class="bi bi-info-circle"></i>
+                Task Information
             </div>
-            <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-4">Donor Name</dt>
-                    <dd class="col-sm-8">{{ task.donor_name }}</dd>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <dl class="info-list">
+                            <dt>Donor Name</dt>
+                            <dd>{{ task.donor_name }}</dd>
 
-                    <dt class="col-sm-4">Status</dt>
-                    <dd class="col-sm-8">
-                        <span
-                            class="badge bg-{% if task.status == 'COMPLETED' %}success{% elif task.status == 'IN_PROGRESS' %}primary{% else %}warning text-dark{% endif %}">
-                            {{ task.get_status_display }}
-                        </span>
-                    </dd>
+                            <dt>Status</dt>
+                            <dd>
+                                <span
+                                    class="badge-status {% if task.status == 'COMPLETED' %}completed{% elif task.status == 'IN_PROGRESS' %}in_progress{% elif task.is_urgent %}urgent{% else %}pending{% endif %}">
+                                    {% if task.status == 'COMPLETED' %}<i class="bi bi-check-circle-fill"></i>
+                                    {% elif task.status == 'IN_PROGRESS' %}<i class="bi bi-hourglass-split"></i>
+                                    {% elif task.is_urgent %}<i class="bi bi-exclamation-triangle-fill"></i>
+                                    {% else %}<i class="bi bi-circle"></i>{% endif %}
+                                    {{ task.get_status_display }}
+                                </span>
+                            </dd>
 
-                    <dt class="col-sm-4">Category</dt>
-                    <dd class="col-sm-8">{{ task.get_category_display }}</dd>
+                            <dt>Category</dt>
+                            <dd>{{ task.get_category_display }}</dd>
 
-                    <dt class="col-sm-4">Address</dt>
-                    <dd class="col-sm-8">{{ task.address }}</dd>
+                            <dt>Created At</dt>
+                            <dd>{{ task.created_at|date:"M d, Y H:i" }}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-sm-6">
+                        <dl class="info-list">
+                            <dt>Assigned Driver</dt>
+                            <dd>
+                                {% if task.assigned_to %}
+                                <div class="d-flex align-items-center gap-2">
+                                    <div
+                                        style="width: 24px; height: 24px; background: #e2e8f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">
+                                        {{ task.assigned_to.username|first|upper }}
+                                    </div>
+                                    {{ task.assigned_to.username }}
+                                </div>
+                                {% else %}
+                                <span class="text-muted fst-italic">Unassigned</span>
+                                {% endif %}
+                            </dd>
 
-                    <dt class="col-sm-4">Phones</dt>
-                    <dd class="col-sm-8">{{ task.phone_numbers }}</dd>
+                            <dt>Contact Phone</dt>
+                            <dd>{{ task.phone_numbers }}</dd>
 
-                    <dt class="col-sm-4">Driver</dt>
-                    <dd class="col-sm-8">{{ task.assigned_to.username|default:"Unassigned" }}</dd>
+                            <dt>Address</dt>
+                            <dd>{{ task.address }}</dd>
 
-                    <dt class="col-sm-4">Created At</dt>
-                    <dd class="col-sm-8">{{ task.created_at }}</dd>
+                            {% if task.completed_at %}
+                            <dt>Completed At</dt>
+                            <dd class="text-success">{{ task.completed_at|date:"M d, Y H:i" }}</dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
 
-                    {% if task.completed_at %}
-                    <dt class="col-sm-4">Completed At</dt>
-                    <dd class="col-sm-8">{{ task.completed_at }}</dd>
-                    {% endif %}
-                </dl>
                 {% if task.location_link %}
-                <a href="{{ task.location_link }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-geo-alt-fill"></i> Open in Google Maps
-                </a>
+                <div class="mt-2 pt-3 border-top">
+                    <a href="{{ task.location_link }}" target="_blank" class="btn-map">
+                        <i class="bi bi-geo-alt-fill"></i> Open Location in Google Maps
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Items Collected -->
-    <div class="col-md-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Items Collected</h5>
+    <!-- Items & Checklist Column -->
+    <div class="col-lg-6">
+        <div class="detail-card">
+            <div class="card-header-styled">
+                <i class="bi bi-box-seam"></i>
+                Items & Checklist
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if task.items.exists %}
                 <div class="table-responsive">
-                    <table class="table table-sm table-bordered">
+                    <table class="table-details">
                         <thead>
                             <tr>
                                 <th>Category</th>
-                                <th>Qty</th>
+                                <th>Quantity</th>
                                 <th>Condition</th>
                             </tr>
                         </thead>
@@ -78,99 +368,119 @@
                             <tr>
                                 <td>{{ item.category }}</td>
                                 <td>{{ item.quantity }}</td>
-                                <td>{{ item.get_condition_display }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ item.get_condition_display
+                                        }}</span></td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
                 {% else %}
-                <p class="text-muted">No items recorded yet.</p>
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-box-seam display-6 mb-2 d-block opacity-50"></i>
+                    No items recorded yet for this task.
+                </div>
                 {% endif %}
 
-                <h6 class="mt-4">Driver Checklist</h6>
-                <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Visitor Form Filled?
-                        {% if task.visitor_form_filled %}
-                        <span class="badge bg-success"><i class="bi bi-check-lg"></i> Yes</span>
-                        {% else %}
-                        <span class="badge bg-secondary">No</span>
-                        {% endif %}
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Trust Notice Given?
-                        {% if task.trust_notice_given %}
-                        <span class="badge bg-success"><i class="bi bi-check-lg"></i> Yes</span>
-                        {% else %}
-                        <span class="badge bg-secondary">No</span>
-                        {% endif %}
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="bg-light p-3 border-top border-bottom">
+                    <h6 class="mb-0 text-uppercase small fw-bold text-muted">Driver Verification</h6>
+                </div>
 
-<!-- Photos -->
-<div class="card mb-4">
-    <div class="card-header bg-light">
-        <h5 class="mb-0">Uploaded Photos</h5>
-    </div>
-    <div class="card-body">
-        {% if task.photos.exists %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for photo in task.photos.all %}
-            <div class="col">
-                <div class="card h-100">
-                    <a href="{{ photo.image.url }}" target="_blank">
-                        <img src="{{ photo.image.url }}" class="card-img-top" alt="{{ photo.get_photo_type_display }}"
-                            style="height: 200px; object-fit: cover;">
-                    </a>
-                    <div class="card-body p-2 text-center">
-                        <small class="text-muted">{{ photo.get_photo_type_display }}</small>
+                <div class="checklist-container">
+                    <div class="checklist-item">
+                        <div>
+                            <span class="d-block fw-medium">Visitor Form Filled</span>
+                            <small class="text-muted">Digital form submission</small>
+                        </div>
+                        {% if task.visitor_form_filled %}
+                        <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Yes</span>
+                        {% else %}
+                        <span class="text-secondary"><i class="bi bi-dash-circle me-1"></i> No</span>
+                        {% endif %}
+                    </div>
+                    <div class="checklist-item">
+                        <div>
+                            <span class="d-block fw-medium">Trust Notice Given</span>
+                            <small class="text-muted">Physical receipt/notice provided</small>
+                        </div>
+                        {% if task.trust_notice_given %}
+                        <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Yes</span>
+                        {% else %}
+                        <span class="text-secondary"><i class="bi bi-dash-circle me-1"></i> No</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-        <p class="text-muted">No photos uploaded.</p>
-        {% endif %}
     </div>
-</div>
 
-<!-- Location Logs (Optional View) -->
-{% if task.location_logs.exists %}
-<div class="card">
-    <div class="card-header bg-light">
-        <h5 class="mb-0">Location History</h5>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-sm mb-0">
-            <thead>
-                <tr>
-                    <th>Event</th>
-                    <th>Lat/Long</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in task.location_logs.all %}
-                <tr>
-                    <td>{{ log.get_event_display }}</td>
-                    <td>
-                        <a href="https://www.google.com/maps?q={{ log.latitude }},{{ log.longitude }}" target="_blank">
-                            {{ log.latitude }}, {{ log.longitude }}
+    <!-- Photos Gallery -->
+    <div class="col-12">
+        <div class="detail-card">
+            <div class="card-header-styled">
+                <i class="bi bi-images"></i>
+                Uploaded Photos & Proofs
+            </div>
+            <div class="card-body p-0">
+                {% if task.photos.exists %}
+                <div class="photo-grid">
+                    {% for photo in task.photos.all %}
+                    <div class="photo-card">
+                        <a href="{{ photo.image.url }}" target="_blank">
+                            <img src="{{ photo.image.url }}" alt="{{ photo.get_photo_type_display }}" loading="lazy">
                         </a>
-                    </td>
-                    <td>{{ log.timestamp }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <div class="photo-caption">
+                            {{ photo.get_photo_type_display }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-image display-4 mb-3 d-block opacity-25"></i>
+                    <p class="mb-0">No photos have been uploaded for this task.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
-</div>
-{% endif %}
 
+    <!-- Location History (Toggleable/Optional) -->
+    {% if task.location_logs.exists %}
+    <div class="col-12">
+        <div class="detail-card">
+            <div class="card-header-styled">
+                <i class="bi bi-geo"></i>
+                Location History
+            </div>
+            <div class="table-responsive">
+                <table class="table-details">
+                    <thead>
+                        <tr>
+                            <th>Activity Event</th>
+                            <th>Coordinates</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in task.location_logs.all %}
+                        <tr>
+                            <td>{{ log.get_event_display }}</td>
+                            <td>
+                                <a href="https://www.google.com/maps?q={{ log.latitude }},{{ log.longitude }}"
+                                    target="_blank" class="text-decoration-none">
+                                    <i class="bi bi-pin-map-fill text-danger"></i> {{ log.latitude }}, {{ log.longitude
+                                    }}
+                                </a>
+                            </td>
+                            <td>{{ log.timestamp|date:"M d, Y H:i:s" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

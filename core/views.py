@@ -57,6 +57,8 @@ class TaskCreateView(AdminRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
+        if not form.instance.assigned_to:
+            form.instance.is_broadcast = True
         messages.success(self.request, "Task created successfully.")
         return super().form_valid(form)
 
@@ -157,13 +159,13 @@ class DriverDashboardView(DriverRequiredMixin, ListView):
     def get_queryset(self):
         # Sort by Urgent first, then Created At
         return Task.objects.filter(
-            assigned_to=self.request.user
+            Q(assigned_to=self.request.user) | Q(is_broadcast=True)
         ).exclude(status='COMPLETED').order_by('-is_urgent', '-created_at')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Get all tasks for this driver (including completed)
-        all_tasks = Task.objects.filter(assigned_to=self.request.user)
+        all_tasks = Task.objects.filter(Q(assigned_to=self.request.user) | Q(is_broadcast=True))
         context['total_tasks'] = all_tasks.count()
         context['in_progress_tasks'] = all_tasks.filter(status='IN_PROGRESS').count()
         context['completed_tasks'] = all_tasks.filter(status='COMPLETED').count()
@@ -174,13 +176,18 @@ class DriverTaskDetailView(DriverRequiredMixin, DetailView):
     template_name = 'core/task_detail_driver.html'
 
     def get_queryset(self):
-        return Task.objects.filter(assigned_to=self.request.user)
+        return Task.objects.filter(Q(assigned_to=self.request.user) | Q(is_broadcast=True))
 
     def post(self, request, *args, **kwargs):
         task = self.get_object()
         action = request.POST.get('action')
         
         if action == 'start_task':
+            # Claim the task if it was broadcast
+            if task.is_broadcast:
+                task.is_broadcast = False
+                task.assigned_to = request.user
+
             task.status = 'IN_PROGRESS'
             task.save()
             
@@ -256,8 +263,8 @@ def complete_task_view(request, pk):
 @login_required
 def receipt_view(request, pk):
     task = get_object_or_404(Task, pk=pk)
-    # Check permission (either admin or the driver who did it)
-    if not (request.user.role == 'ADMIN' or task.assigned_to == request.user):
+    # Check permission (either admin/superuser or the driver who did it)
+    if not (request.user.role == 'ADMIN' or request.user.is_superuser or task.assigned_to == request.user):
          return redirect('login') # Or 403
 
     items = task.items.all()

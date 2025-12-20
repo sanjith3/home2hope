@@ -14,6 +14,8 @@ class TaskCreationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['assigned_to'].queryset = User.objects.filter(role='DRIVER')
         self.fields['assigned_to'].label_from_instance = lambda obj: f"{obj.username} ({obj.phone_number})"
+        self.fields['assigned_to'].required = False
+        self.fields['assigned_to'].empty_label = "Broadcast to All Drivers"
         
         for field in self.fields:
             if field != 'is_urgent':
