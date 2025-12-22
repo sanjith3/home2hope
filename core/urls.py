@@ -9,8 +9,8 @@ urlpatterns = [
     path('admin-dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
     path('tasks/create/', views.TaskCreateView.as_view(), name='task_create'),
     path('tasks/', views.TaskListView.as_view(), name='task_list'),
+    path('tasks/history/', views.TaskHistoryView.as_view(), name='task_history'),
     path('tasks/<int:pk>/admin/', views.AdminTaskDetailView.as_view(), name='admin_task_detail'),
-    path('tasks/export/', views.ExportTasksView.as_view(), name='task_export'),
     path('tasks/export/', views.ExportTasksView.as_view(), name='task_export'),
     
     # Driver Management (Admin)

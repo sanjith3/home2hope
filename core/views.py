@@ -100,6 +100,27 @@ class TaskListView(AdminRequiredMixin, ListView):
         context['is_completed'] = (status == 'COMPLETED')
         return context
 
+class TaskHistoryView(AdminRequiredMixin, ListView):
+    model = Task
+    template_name = 'core/task_history.html'
+    context_object_name = 'tasks'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = Task.objects.filter(status='COMPLETED')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        
+        if start_date:
+            queryset = queryset.filter(created_at__date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(created_at__date__lte=end_date)
+            
+        return queryset.order_by('id')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 class AdminTaskDetailView(AdminRequiredMixin, DetailView):
     model = Task
     template_name = 'core/task_detail_admin.html'
@@ -266,6 +287,9 @@ def complete_task_view(request, pk):
                 )
             
             messages.success(request, "Task completed successfully!")
+            item_formset = ItemFormSet(queryset=Item.objects.none())
+            photo_formset = PhotoFormSet(queryset=TaskPhoto.objects.none())
+
             return redirect('receipt_view', pk=task.pk)
     else:
         task_form = TaskCompletionForm(instance=task)

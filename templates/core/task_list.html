@@ -250,23 +250,8 @@
                     <option value="COMPLETED" {% if is_completed %}selected{% endif %}>Completed</option>
                 </select>
 
-                <div class="d-flex align-items-center gap-1">
-                    <span class="small text-muted">From:</span>
-                    <input type="date" name="start_date" class="form-control form-control-sm border-0 bg-light"
-                        value="{{ request.GET.start_date }}">
-                </div>
-                <div class="d-flex align-items-center gap-1">
-                    <span class="small text-muted">To:</span>
-                    <input type="date" name="end_date" class="form-control form-control-sm border-0 bg-light"
-                        value="{{ request.GET.end_date }}">
-                </div>
-
                 <button type="submit" class="btn btn-sm btn-primary px-3 rounded-pill">
                     <i class="bi bi-filter"></i> Apply
-                </button>
-                <button type="submit" formaction="{% url 'task_export' %}"
-                    class="btn btn-sm btn-outline-success px-3 rounded-pill">
-                    <i class="bi bi-download"></i> Download Report (CSV)
                 </button>
             </div>
         </div>
