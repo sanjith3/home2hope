@@ -72,9 +72,16 @@ class TaskListView(AdminRequiredMixin, ListView):
         queryset = super().get_queryset()
         status = self.request.GET.get('status')
         filter_type = self.request.GET.get('filter')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
         
         if status:
             queryset = queryset.filter(status=status)
+        
+        if start_date:
+            queryset = queryset.filter(created_at__date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(created_at__date__lte=end_date)
         
         if filter_type == 'pending':
             queryset = queryset.exclude(status='COMPLETED')
@@ -83,7 +90,7 @@ class TaskListView(AdminRequiredMixin, ListView):
         elif filter_type == 'completed':
             queryset = queryset.filter(status='COMPLETED')
             
-        return queryset.order_by('-created_at')
+        return queryset.order_by('id')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -100,13 +107,25 @@ class AdminTaskDetailView(AdminRequiredMixin, DetailView):
 
 class ExportTasksView(AdminRequiredMixin, View):
     def get(self, request):
+        status = request.GET.get('status')
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+
+        tasks = Task.objects.all().select_related('assigned_to').prefetch_related('items')
+
+        if status:
+            tasks = tasks.filter(status=status)
+        if start_date:
+            tasks = tasks.filter(created_at__date__gte=start_date)
+        if end_date:
+            tasks = tasks.filter(created_at__date__lte=end_date)
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="tasks_export.csv"'
 
         writer = csv.writer(response)
         writer.writerow(['ID', 'Donor', 'Address', 'Status', 'Driver', 'Items Collected', 'Created At'])
 
-        tasks = Task.objects.all().select_related('assigned_to').prefetch_related('items')
         for task in tasks:
             items_str = ", ".join([f"{i.quantity} {i.category}" for i in task.items.all()])
             driver = task.assigned_to.username if task.assigned_to else 'Unassigned'
