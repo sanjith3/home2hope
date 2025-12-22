@@ -1,49 +1,321 @@
 {% extends 'base.html' %}
 
-{% block title %}Receipt - Home 2 Hope{% endblock %}
+{% block title %}Donation Receipt - #{{ task.id }} - Home 2 Hope{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card border-primary">
-            <div class="card-header bg-primary text-white text-center">
-                <i class="bi bi-heart-fill fs-1"></i>
-                <h3 class="mt-2">Donation Receipt</h3>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    :root {
+        --primary-blue: #0d6efd;
+        --text-dark: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: var(--text-dark);
+    }
+
+    .receipt-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .receipt-header {
+        background: var(--primary-blue);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .receipt-header i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .receipt-header h1 {
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .receipt-body {
+        padding: 2.5rem;
+    }
+
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--primary-blue);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 0.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-item .value {
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .items-table {
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .items-table th {
+        background: #f8fafc;
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .items-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .photo-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .photo-item {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        aspect-ratio: 1;
+    }
+
+    .photo-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .checklist-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-size: 0.813rem;
+        font-weight: 500;
+        background: #f0fdf4;
+        color: #16a34a;
+        margin-right: 1rem;
+    }
+
+    .action-bar {
+        background: #f8fafc;
+        padding: 2rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        body {
+            background: white !important;
+        }
+
+        .navbar,
+        .action-bar,
+        .btn-link {
+            display: none !important;
+        }
+
+        .receipt-container {
+            box-shadow: none !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            border-radius: 0 !important;
+        }
+
+        .receipt-header {
+            padding: 1.5rem !important;
+            background: white !important;
+            color: black !important;
+            border-bottom: 2px solid black !important;
+        }
+
+        .receipt-header i {
+            color: #dc3545 !important;
+        }
+
+        .section-title {
+            border-bottom: 1px solid #ccc !important;
+        }
+
+        .photo-gallery {
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+    }
+</style>
+
+<div class="receipt-container">
+    <div class="receipt-header">
+        <i class="bi bi-heart-fill"></i>
+        <h1>Donation Receipt</h1>
+        <p class="mb-0 opacity-75">Thank you for your generous contribution</p>
+    </div>
+
+    <div class="receipt-body">
+        <!-- Task Details -->
+        <h5 class="section-title">
+            <i class="bi bi-info-circle"></i> Task Details
+        </h5>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Receipt ID</label>
+                <div class="value">#REC-{{ task.id }}-{{ task.completed_at|date:"Ymd" }}</div>
             </div>
-            <div class="card-body">
-                <div class="text-center mb-4">
-                    <h5>Thank you for your generous donation!</h5>
-                    <p class="text-muted">{{ task.created_at|date:"F d, Y" }}</p>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-6 text-end fw-bold">Donor Name:</div>
-                    <div class="col-6">{{ task.donor_name }}</div>
-                </div>
-
-                <h5 class="border-bottom pb-2 mt-4">Items Collected</h5>
-                <ul class="list-group list-group-flush mb-4">
-                    {% for item in items %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>{{ item.category }} ({{ item.condition|lower|capfirst }})</span>
-                        <span class="badge bg-primary rounded-pill">{{ item.quantity }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-
-                <hr>
-
-                <div class="d-grid gap-2">
-                    <a href="https://wa.me/?text={{ wa_text }}" target="_blank" class="btn btn-success btn-lg">
-                        <i class="bi bi-whatsapp"></i> Share on WhatsApp
-                    </a>
-                    <button onclick="window.print()" class="btn btn-outline-secondary">
-                        <i class="bi bi-printer"></i> Print / Save as PDF
-                    </button>
-                    <a href="{% url 'dashboard' %}" class="btn btn-link">Back to Dashboard</a>
-                </div>
+            <div class="info-item">
+                <label>Donor Name</label>
+                <div class="value">{{ task.donor_name }}</div>
+            </div>
+            <div class="info-item">
+                <label>Phone</label>
+                <div class="value">{{ task.phone_numbers }}</div>
+            </div>
+            <div class="info-item">
+                <label>Collection Date</label>
+                <div class="value">{{ task.completed_at|date:"F d, Y" }}</div>
             </div>
         </div>
+
+        <div class="mb-4">
+            <label class="text-xs fw-bold text-muted text-uppercase ls-1">Pickup Address</label>
+            <p class="mb-0">{{ task.address }}</p>
+        </div>
+
+        <!-- Items Collected -->
+        <h5 class="section-title">
+            <i class="bi bi-box-seam"></i> Items & Checklist
+        </h5>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Item Category</th>
+                    <th>Condition</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td class="fw-500">{{ item.category }}</td>
+                    <td><span class="text-muted">{{ item.get_condition_display }}</span></td>
+                    <td class="fw-600">{{ item.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="mb-5">
+            {% if task.visitor_form_filled %}
+            <span class="checklist-badge"><i class="bi bi-check2-circle"></i> Visitor Form Verified</span>
+            {% endif %}
+            {% if task.trust_notice_given %}
+            <span class="checklist-badge"><i class="bi bi-check2-circle"></i> Trust Notice Provided</span>
+            {% endif %}
+        </div>
+
+        <!-- Driver Verification -->
+        <h5 class="section-title">
+            <i class="bi bi-person-check"></i> Driver Verification
+        </h5>
+        <div class="info-grid mb-4">
+            <div class="info-item">
+                <label>Assigned Driver</label>
+                <div class="value">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</div>
+            </div>
+            <div class="info-item">
+                <label>Completed At</label>
+                <div class="value">{{ task.completed_at|date:"M d, Y H:i" }}</div>
+            </div>
+        </div>
+
+        <!-- Photos & Proofs -->
+        {% if photos %}
+        <h5 class="section-title">
+            <i class="bi bi-camera"></i> Uploaded Photos & Proofs
+        </h5>
+        <div class="photo-gallery">
+            {% for photo in photos %}
+            <div class="photo-item">
+                <img src="{{ photo.image.url }}" alt="{{ photo.get_photo_type_display }}">
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
+
+    <div class="action-bar">
+        <a href="https://wa.me/?text={{ wa_text }}" target="_blank" class="btn btn-success px-4 rounded-pill">
+            <i class="bi bi-whatsapp"></i> Share on WhatsApp
+        </a>
+        <button onclick="window.print()" class="btn btn-primary px-4 rounded-pill">
+            <i class="bi bi-download"></i> Download / Save as PDF
+        </button>
+    </div>
+</div>
+
+<div class="text-center pb-5 no-print">
+    <a href="{% url 'dashboard' %}" class="btn btn-link text-muted text-decoration-none">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
 </div>
 {% endblock %}

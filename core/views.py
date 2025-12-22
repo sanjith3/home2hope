@@ -321,6 +321,7 @@ def receipt_view(request, pk):
     context = {
         'task': task,
         'items': items,
-        'wa_text': wa_text
+        'wa_text': wa_text,
+        'photos': task.photos.all(),
     }
     return render(request, 'core/receipt.html', context)
