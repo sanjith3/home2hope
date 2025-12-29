@@ -245,7 +245,7 @@
                     </h5>
                     <div class="alert alert-info-custom d-flex align-items-center mb-3">
                         <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-                        <small id="form-hint">Please upload 4 mandatory photos (3 Item, 1 Donor). Photo 5 (Visitor Form)
+                        <small id="form-hint">Please upload 5 mandatory photos (4 Item, 1 Donor). Photo 6 (Visitor Form)
                             is required only if filled.</small>
                     </div>
                     <div id="photo-upload" class="mb-3">
@@ -265,6 +265,10 @@
                             <div class="col-md-6 mb-3">
                                 {{ photo_form.image4.label_tag }}
                                 {{ photo_form.image4 }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ photo_form.image5.label_tag }}
+                                {{ photo_form.image5 }}
                             </div>
                         </div>
                         {% if photo_form.non_field_errors %}
@@ -291,7 +295,7 @@
                             <label class="form-label fw-600 small text-primary">
                                 <i class="bi bi-camera-fill me-1"></i> Upload Visitor Form Photo
                             </label>
-                            {{ photo_form.image5 }}
+                            {{ photo_form.image6 }}
                         </div>
                         <div class="form-check form-switch fs-5">
                             {{ task_form.trust_notice_given }}
@@ -324,10 +328,10 @@
         function toggleVisitorForm() {
             if (visitorFormCheckbox && visitorFormCheckbox.checked) {
                 visitorFormContainer.style.display = 'block';
-                formHint.textContent = "Please upload all 5 photos including the Visitor Form.";
+                formHint.textContent = "Please upload all 6 photos including the Visitor Form.";
             } else if (visitorFormContainer) {
                 visitorFormContainer.style.display = 'none';
-                formHint.textContent = "Please upload 4 mandatory photos (3 Item, 1 Donor). Photo 5 (Visitor Form) is required only if filled.";
+                formHint.textContent = "Please upload 5 mandatory photos (4 Item, 1 Donor). Photo 6 (Visitor Form) is required only if filled.";
             }
         }
 

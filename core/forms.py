@@ -56,5 +56,6 @@ class TaskPhotoMultipleForm(forms.Form):
     image1 = forms.ImageField(label='Photo 1 (Item)', required=True, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
     image2 = forms.ImageField(label='Photo 2 (Item)', required=True, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
     image3 = forms.ImageField(label='Photo 3 (Item)', required=True, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
-    image4 = forms.ImageField(label='Photo 4 (Donor/Front)', required=True, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
-    image5 = forms.ImageField(label='Photo 5 (Visitor Form)', required=False, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
+    image4 = forms.ImageField(label='Photo 4 (Item)', required=True, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
+    image5 = forms.ImageField(label='Photo 5 (Donor/Front)', required=True, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
+    image6 = forms.ImageField(label='Photo 6 (Visitor Form)', required=False, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))

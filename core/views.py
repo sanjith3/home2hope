@@ -259,12 +259,12 @@ def complete_task_view(request, pk):
         photo_form = TaskPhotoMultipleForm(request.POST, request.FILES)
 
         if task_form.is_valid() and item_formset.is_valid() and photo_form.is_valid():
-            # Conditional validation for image5
+            # Conditional validation for image6 (Visitor Form)
             visitor_form_filled = task_form.cleaned_data.get('visitor_form_filled')
-            image5 = photo_form.cleaned_data.get('image5')
+            image6 = photo_form.cleaned_data.get('image6')
             
-            if visitor_form_filled and not image5:
-                photo_form.add_error(None, "Please upload the Visitor Form photo (Photo 5) since you marked it as filled.")
+            if visitor_form_filled and not image6:
+                photo_form.add_error(None, "Please upload the Visitor Form photo (Photo 6) since you marked it as filled.")
             else:
                 task_form.save()
             
@@ -273,8 +273,8 @@ def complete_task_view(request, pk):
                 instance.task = task
                 instance.save()
             
-            # Save uploaded images from the 5 separate fields
-            for i in range(1, 6):
+            # Save uploaded images from the 6 separate fields
+            for i in range(1, 7):
                 field_name = f'image{i}'
                 img = photo_form.cleaned_data.get(field_name)
                 if img:

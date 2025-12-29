@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Home 2 Hope</title>
+    {% load static %}
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -842,6 +843,13 @@
                 text-align: center;
             }
         }
+        #Logo_icon{
+          background-repeat: no-repeat;
+          background-position: center center;
+          background-size: cover;
+          width: 100px !important;
+          height: 58px !important;
+        }
     </style>
 </head>
 
@@ -849,11 +857,12 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <div class="logo-icon">
-                <i class="bi bi-heart-fill"></i>
+            <div class="logo-icon" id="Logo_icon" style="background-image:url('{% static 'Img/Ramajeyam_Trust.PNG' %}');">
+
+<!--                <i class="bi bi-mouse3-fill"></i>-->
             </div>
             <div class="logo-text">
-                <h3>Home 2 Hope</h3>
+                <h3>SRI RAMAJAYAM TRUST</h3>
                 <p>Admin Portal</p>
             </div>
         </div>
