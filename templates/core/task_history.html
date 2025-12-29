@@ -204,7 +204,7 @@
             </thead>
             <tbody>
                 {% for task in tasks %}
-                <tr onclick="window.location='{% url 'admin_task_detail' task.pk %}';" style="cursor: pointer;">
+                <tr onclick="window.location.href = '{% url 'admin_task_detail' task.pk %}'" style="cursor: pointer;">
                     <td>
                         <span class="task-id">#{{ task.id }}</span>
                     </td>

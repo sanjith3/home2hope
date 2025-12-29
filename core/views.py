@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.db.models import Count, Q
 from django.utils import timezone
 from .models import Task, Item, TaskPhoto, LocationLog
-from .forms import TaskCreationForm, TaskCompletionForm, ItemForm, TaskPhotoForm
+from .forms import TaskCreationForm, TaskCompletionForm, ItemForm, TaskPhotoForm, TaskPhotoMultipleForm
 from django.forms import modelformset_factory
 
 from django.http import HttpResponse
@@ -251,25 +251,34 @@ def complete_task_view(request, pk):
     task = get_object_or_404(Task, pk=pk, assigned_to=request.user)
     
     ItemFormSet = modelformset_factory(Item, form=ItemForm, extra=1, can_delete=True)
-    PhotoFormSet = modelformset_factory(TaskPhoto, form=TaskPhotoForm, extra=1, can_delete=True)
+# PhotoFormSet removed; using TaskPhotoMultipleForm for multi-file upload
 
     if request.method == 'POST':
         task_form = TaskCompletionForm(request.POST, instance=task)
         item_formset = ItemFormSet(request.POST, queryset=Item.objects.none())
-        photo_formset = PhotoFormSet(request.POST, request.FILES, queryset=TaskPhoto.objects.none()) # Using none because creating new ones
+        photo_form = TaskPhotoMultipleForm(request.POST, request.FILES)
 
-        if task_form.is_valid() and item_formset.is_valid() and photo_formset.is_valid():
-            task_form.save()
+        if task_form.is_valid() and item_formset.is_valid() and photo_form.is_valid():
+            # Conditional validation for image5
+            visitor_form_filled = task_form.cleaned_data.get('visitor_form_filled')
+            image5 = photo_form.cleaned_data.get('image5')
+            
+            if visitor_form_filled and not image5:
+                photo_form.add_error(None, "Please upload the Visitor Form photo (Photo 5) since you marked it as filled.")
+            else:
+                task_form.save()
             
             instances = item_formset.save(commit=False)
             for instance in instances:
                 instance.task = task
                 instance.save()
             
-            photos = photo_formset.save(commit=False)
-            for photo in photos:
-                photo.task = task
-                photo.save()
+            # Save uploaded images from the 5 separate fields
+            for i in range(1, 6):
+                field_name = f'image{i}'
+                img = photo_form.cleaned_data.get(field_name)
+                if img:
+                    TaskPhoto.objects.create(task=task, image=img, photo_type='ITEM')
 
             task.status = 'COMPLETED'
             task.completed_at = timezone.now()
@@ -288,19 +297,19 @@ def complete_task_view(request, pk):
             
             messages.success(request, "Task completed successfully!")
             item_formset = ItemFormSet(queryset=Item.objects.none())
-            photo_formset = PhotoFormSet(queryset=TaskPhoto.objects.none())
+            photo_form = TaskPhotoMultipleForm()
 
             return redirect('receipt_view', pk=task.pk)
     else:
         task_form = TaskCompletionForm(instance=task)
         item_formset = ItemFormSet(queryset=Item.objects.none())
-        photo_formset = PhotoFormSet(queryset=TaskPhoto.objects.none())
+        photo_form = TaskPhotoMultipleForm()
 
     return render(request, 'core/task_completion.html', {
         'task': task,
         'task_form': task_form,
         'item_formset': item_formset,
-        'photo_formset': photo_formset
+        'photo_form': photo_form
     })
 
 @login_required
