@@ -215,7 +215,6 @@
 
         to {
             opacity: 1;
-            transform: translateY(0);
         }
     }
 
@@ -227,7 +226,6 @@
 
         to {
             opacity: 1;
-            transform: translateY(0);
         }
     }
 </style>
@@ -248,13 +246,30 @@
         <div class="flex-grow-1">
             <label for="status" class="visually-hidden">Status</label>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select name="status" id="status" class="form-select border-0 bg-light" style="width: auto;"
-                    onchange="this.form.submit()">
-                    <option value="">All Statuses</option>
-                    <option value="ASSIGNED" {% if is_assigned %}selected{% endif %}>Assigned</option>
-                    <option value="IN_PROGRESS" {% if is_in_progress %}selected{% endif %}>In Progress</option>
-                    <option value="COMPLETED" {% if is_completed %}selected{% endif %}>Completed</option>
+                <select name="status" id="status" class="form-select border-0 bg-light" style="width: auto;">
+                    <option value="" {% if request.GET.status == '' %}selected{% endif %}>All Statuses</option>
+                    <option value="ASSIGNED" {% if request.GET.status == 'ASSIGNED' %}selected{% endif %}>Assigned
+                    </option>
+                    <option value="IN_PROGRESS" {% if request.GET.status == 'IN_PROGRESS' %}selected{% endif %}>In
+                        Progress</option>
+                    <option value="COMPLETED" {% if request.GET.status == 'COMPLETED' %}selected{% endif %}>Completed
+                    </option>
+                    <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled
+                    </option>
                 </select>
+
+                <div class="d-flex align-items-center gap-2 bg-light rounded px-2">
+                    <label for="start_date" class="text-muted small mb-0">From:</label>
+                    <input type="date" name="start_date" id="start_date"
+                        class="form-control border-0 bg-transparent p-1" value="{{ request.GET.start_date }}"
+                        style="width: 130px; font-size: 0.9rem;">
+                </div>
+
+                <div class="d-flex align-items-center gap-2 bg-light rounded px-2">
+                    <label for="end_date" class="text-muted small mb-0">To:</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control border-0 bg-transparent p-1"
+                        value="{{ request.GET.end_date }}" style="width: 130px; font-size: 0.9rem;">
+                </div>
 
                 <button type="submit" class="btn btn-sm btn-primary px-3 rounded-pill">
                     <i class="bi bi-filter"></i> Apply

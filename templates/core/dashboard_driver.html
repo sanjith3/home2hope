@@ -708,11 +708,18 @@
                         class="badge status-{% if task.status == 'COMPLETED' %}completed{% elif task.status == 'IN_PROGRESS' %}in-progress{% else %}assigned{% endif %}">
                         {{ task.get_status_display }}
                     </span>
+                    {% if task.is_broadcast %}
+                    <span class="badge bg-info text-white">Broadcast Request</span>
+                    {% endif %}
                 </div>
 
                 <a href="{% url 'driver_task_detail' task.pk %}" class="task-action">
                     <i class="bi bi-arrow-right-circle"></i>
+                    {% if task.is_broadcast %}
+                    Review to Claim
+                    {% else %}
                     View Details
+                    {% endif %}
                 </a>
             </div>
             {% endfor %}
