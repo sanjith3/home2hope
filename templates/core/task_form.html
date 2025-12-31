@@ -183,18 +183,23 @@
             <form method="post" class="needs-validation" novalidate>
                 {% csrf_token %}
 
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label" for="id_donor_name">Donor Name</label>
-                        {{ form.donor_name }}
+                <!-- Hidden inputs that store the actual concatenated values -->
+                <div class="d-none">
+                    {{ form.donor_name }}
+                    {{ form.phone_numbers }}
+                </div>
+
+                <!-- Dynamic Donor Rows Container -->
+                <div class="mb-4">
+                    <label class="form-label">Donor Details</label>
+                    <div id="donor-rows-container">
+                        <!-- Rows will be injected by JS -->
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="id_phone_numbers">Phone Number(s)</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 text-muted"><i
-                                    class="bi bi-telephone"></i></span>
-                            {{ form.phone_numbers }}
-                        </div>
+                    <button type="button" class="btn btn-sm btn-light border text-primary mt-2" onclick="addDonorRow()">
+                        <i class="bi bi-plus-circle-fill"></i> Add Another Donor
+                    </button>
+                    <div class="form-text text-muted small">
+                        Verify multiple donors if adding more than one.
                     </div>
                 </div>
 
@@ -249,14 +254,80 @@
 </div>
 
 <script>
-    // Add bootstrap classes to form fields automatically
+    // Dynamic Donor Row Logic
+    const container = document.getElementById('donor-rows-container');
+    const hiddenName = document.getElementById('id_donor_name');
+    const hiddenPhone = document.getElementById('id_phone_numbers');
+
+    function createRowHtml(name = '', phone = '') {
+        return `
+            <div class="row g-2 mb-2 donor-row align-items-end">
+                <div class="col-6">
+                    <label class="form-label small text-muted mb-1">Name</label>
+                    <input type="text" class="form-control donor-name-input" placeholder="Donor Name" value="${name}" oninput="updateHiddenFields()">
+                </div>
+                <div class="col-5">
+                    <label class="form-label small text-muted mb-1">Phone</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted px-2"><i class="bi bi-telephone"></i></span>
+                        <input type="text" class="form-control phone-input" placeholder="Phone" value="${phone}" oninput="updateHiddenFields()">
+                    </div>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-outline-danger w-100" onclick="removeRow(this)" title="Remove">
+                        <i class="bi bi-dash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function addDonorRow(name = '', phone = '') {
+        const div = document.createElement('div');
+        div.innerHTML = createRowHtml(name, phone);
+        container.appendChild(div.firstElementChild);
+        updateHiddenFields(); // Ensure sync
+    }
+
+    function removeRow(btn) {
+        if (container.querySelectorAll('.donor-row').length > 1) {
+            btn.closest('.donor-row').remove();
+            updateHiddenFields();
+        } else {
+            // If only one row, just clear it
+            const row = btn.closest('.donor-row');
+            row.querySelector('.donor-name-input').value = '';
+            row.querySelector('.phone-input').value = '';
+            updateHiddenFields();
+        }
+    }
+
+    function updateHiddenFields() {
+        const names = Array.from(container.querySelectorAll('.donor-name-input')).map(input => input.value.trim()).filter(v => v);
+        const phones = Array.from(container.querySelectorAll('.phone-input')).map(input => input.value.trim()).filter(v => v);
+
+        hiddenName.value = names.join(', ');
+        hiddenPhone.value = phones.join(', ');
+    }
+
+    // Initialize on load
     document.addEventListener('DOMContentLoaded', function () {
+        // Parse existing values (for edit mode or validation errors)
+        const initialNames = hiddenName.value ? hiddenName.value.split(',').map(s => s.trim()) : [];
+        const initialPhones = hiddenPhone.value ? hiddenPhone.value.split(',').map(s => s.trim()) : [];
+
+        const maxRows = Math.max(initialNames.length, initialPhones.length, 1);
+
+        for (let i = 0; i < maxRows; i++) {
+            addDonorRow(initialNames[i] || '', initialPhones[i] || '');
+        }
+
+        // Apply Bootstrap classes to other fields (legacy script)
         const inputs = document.querySelectorAll('input[type="text"], input[type="url"], textarea');
         inputs.forEach(input => {
-            if (!input.classList.contains('form-control')) {
+            if (!input.classList.contains('form-control') && !input.classList.contains('phone-input') && !input.classList.contains('donor-name-input')) {
                 input.classList.add('form-control');
             }
-            // Fix corners when in input group
             if (input.parentElement.classList.contains('input-group')) {
                 input.style.borderTopLeftRadius = '0';
                 input.style.borderBottomLeftRadius = '0';
