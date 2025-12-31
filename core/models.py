@@ -25,6 +25,7 @@ class Task(models.Model):
         (STATUS_ASSIGNED, 'Assigned'),
         (STATUS_IN_PROGRESS, 'In Progress'),
         (STATUS_COMPLETED, 'Completed'),
+        ('CANCELLED', 'Cancelled'),
     ]
 
     donor_name = models.CharField(max_length=255)

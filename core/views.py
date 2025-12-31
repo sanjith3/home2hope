@@ -154,6 +154,22 @@ class ExportTasksView(AdminRequiredMixin, View):
 
         return response
 
+class TaskCancelView(AdminRequiredMixin, View):
+    def post(self, request, pk):
+        task = get_object_or_404(Task, pk=pk)
+        task.status = 'CANCELLED'
+        task.save()
+        messages.success(request, f"Task #{task.id} has been cancelled.")
+        return redirect('task_list')
+
+class TaskResetView(AdminRequiredMixin, View):
+    def post(self, request, pk):
+        task = get_object_or_404(Task, pk=pk)
+        task.status = 'ASSIGNED'
+        task.save()
+        messages.success(request, f"Task #{task.id} has been re-opened/reset.")
+        return redirect('task_list')
+
         return response
 
 from django.contrib.auth.hashers import make_password

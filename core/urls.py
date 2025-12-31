@@ -11,6 +11,8 @@ urlpatterns = [
     path('tasks/', views.TaskListView.as_view(), name='task_list'),
     path('tasks/history/', views.TaskHistoryView.as_view(), name='task_history'),
     path('tasks/<int:pk>/admin/', views.AdminTaskDetailView.as_view(), name='admin_task_detail'),
+    path('tasks/<int:pk>/cancel/', views.TaskCancelView.as_view(), name='task_cancel'),
+    path('tasks/<int:pk>/reset/', views.TaskResetView.as_view(), name='task_reset'),
     path('tasks/export/', views.ExportTasksView.as_view(), name='task_export'),
     
     # Driver Management (Admin)

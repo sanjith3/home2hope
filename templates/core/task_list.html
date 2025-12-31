@@ -164,6 +164,12 @@
         color: #d97706;
     }
 
+    .badge-status.cancelled {
+        background: #f1f5f9;
+        color: #64748b;
+        text-decoration: line-through;
+    }
+
     .avatar-circle {
         width: 32px;
         height: 32px;
@@ -293,10 +299,11 @@
                     </td>
                     <td>
                         <span
-                            class="badge-status {% if task.status == 'COMPLETED' %}completed{% elif task.status == 'IN_PROGRESS' %}in_progress{% elif task.status == 'ASSIGNED' %}assigned{% else %}pending{% endif %}">
+                            class="badge-status {% if task.status == 'COMPLETED' %}completed{% elif task.status == 'IN_PROGRESS' %}in_progress{% elif task.status == 'ASSIGNED' %}assigned{% elif task.status == 'CANCELLED' %}cancelled{% else %}pending{% endif %}">
                             {% if task.status == 'COMPLETED' %}<i class="bi bi-check-circle-fill"></i>
                             {% elif task.status == 'IN_PROGRESS' %}<i class="bi bi-truck"></i>
                             {% elif task.status == 'ASSIGNED' %}<i class="bi bi-person-check-fill"></i>
+                            {% elif task.status == 'CANCELLED' %}<i class="bi bi-x-circle-fill"></i>
                             {% else %}<i class="bi bi-circle"></i>{% endif %}
                             {{ task.get_status_display }}
                         </span>
@@ -324,12 +331,38 @@
                     </td>
                     <td class="text-muted">{{ task.created_at|date:"M d, Y" }}</td>
                     <td>
-                        {% if task.status == 'COMPLETED' %}
-                        <a href="{% url 'receipt_view' task.pk %}" onclick="event.stopPropagation()"
-                            class="btn btn-sm btn-outline-success rounded-pill px-3">
-                            <i class="bi bi-receipt me-1"></i> Receipt
-                        </a>
-                        {% endif %}
+                        <div class="d-flex gap-2">
+                            {% if task.status == 'COMPLETED' %}
+                            <a href="{% url 'receipt_view' task.pk %}" onclick="event.stopPropagation()"
+                                class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                <i class="bi bi-receipt me-1"></i> Receipt
+                            </a>
+                            {% endif %}
+
+                            {% if task.status == 'ASSIGNED' or task.status == 'IN_PROGRESS' %}
+                            <form action="{% url 'task_cancel' task.pk %}" method="post"
+                                onsubmit="return confirm('Cancel task #{{task.id}}?');" class="d-inline"
+                                onclick="event.stopPropagation()">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                    title="Cancel Task">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {% if task.status == 'CANCELLED' %}
+                            <form action="{% url 'task_reset' task.pk %}" method="post"
+                                onsubmit="return confirm('Re-open task #{{task.id}}?');" class="d-inline"
+                                onclick="event.stopPropagation()">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-3"
+                                    title="Re-open Task">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
