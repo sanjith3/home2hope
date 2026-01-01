@@ -4,8 +4,9 @@ from .models import Task, Item, TaskPhoto, User
 class TaskCreationForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['donor_name', 'address', 'phone_numbers', 'location_link', 'category', 'is_urgent', 'assigned_to']
+        fields = ['donor_name', 'address', 'phone_numbers', 'location_link', 'category','qty', 'is_urgent', 'assigned_to']
         widgets = {
+            'qty':forms.NumberInput(attrs={'class':'form-control','placeholder':'Quantity'}),
             'address': forms.Textarea(attrs={'rows': 3}),
             'is_urgent': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

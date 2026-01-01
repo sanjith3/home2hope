@@ -42,7 +42,7 @@ class Task(models.Model):
         ('OTHER', 'Other'),
     ]
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='OTHER')
-    
+    qty = models.PositiveIntegerField(null=True,blank=True)
     is_urgent = models.BooleanField(default=False)
     is_broadcast = models.BooleanField(default=False, help_text="If true, this task is visible to all drivers until assigned")
     
@@ -60,7 +60,7 @@ class Task(models.Model):
     trust_notice_given = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.donor_name} - {self.status}"
+        return f"{self.donor_name} - {self.status}- {self.qty }"
 
 class Item(models.Model):
     CONDITION_GOOD = 'GOOD'
