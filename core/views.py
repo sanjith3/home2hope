@@ -12,6 +12,9 @@ from django.forms import modelformset_factory
 
 from django.http import HttpResponse
 import csv
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.contrib.staticfiles import finders
 
 @login_required
 def dashboard(request):
@@ -95,9 +98,12 @@ class TaskListView(AdminRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         status = self.request.GET.get('status')
+        context['current_status'] = status
+        context['is_all'] = not status
         context['is_assigned'] = (status == 'ASSIGNED')
         context['is_in_progress'] = (status == 'IN_PROGRESS')
         context['is_completed'] = (status == 'COMPLETED')
+        context['is_cancelled'] = (status == 'CANCELLED')
         return context
 
 class TaskHistoryView(AdminRequiredMixin, ListView):
@@ -152,6 +158,58 @@ class ExportTasksView(AdminRequiredMixin, View):
             driver = task.assigned_to.username if task.assigned_to else 'Unassigned'
             writer.writerow([task.id, task.donor_name, task.address, task.get_status_display(), driver, items_str, task.created_at])
 
+        return response
+
+
+class TaskPDFView(AdminRequiredMixin, View):
+    def get(self, request):
+        status = request.GET.get('status')
+        filter_type = request.GET.get('filter')
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+
+        tasks = Task.objects.all().select_related('assigned_to')
+
+        if status:
+            tasks = tasks.filter(status=status)
+        
+        if start_date:
+            tasks = tasks.filter(created_at__date__gte=start_date)
+        if end_date:
+            tasks = tasks.filter(created_at__date__lte=end_date)
+        
+        if filter_type == 'pending':
+            tasks = tasks.exclude(status='COMPLETED')
+        elif filter_type == 'urgent':
+            tasks = tasks.filter(is_urgent=True)
+        elif filter_type == 'completed':
+            tasks = tasks.filter(status='COMPLETED')
+
+        tasks = tasks.order_by('id')
+
+        template_path = 'core/task_list_pdf.html'
+        context = {
+            'tasks': tasks,
+            'start_date': start_date,
+            'end_date': end_date,
+            'status': status,
+            'filter_type': filter_type,
+            'generated_at': timezone.now(),
+        }
+        
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'filename="tasks_report.pdf"'
+        
+        template = get_template(template_path)
+        html = template.render(context)
+
+        # Create the PDF
+        pisa_status = pisa.CreatePDF(
+           html, dest=response
+        )
+
+        if pisa_status.err:
+           return HttpResponse('We had some errors <pre>' + html + '</pre>')
         return response
 
 class TaskCancelView(AdminRequiredMixin, View):

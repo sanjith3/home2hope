@@ -247,14 +247,14 @@
             <label for="status" class="visually-hidden">Status</label>
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <select name="status" id="status" class="form-select border-0 bg-light" style="width: auto;">
-                    <option value="" {% if request.GET.status == '' %}selected{% endif %}>All Statuses</option>
-                    <option value="ASSIGNED" {% if request.GET.status == 'ASSIGNED' %}selected{% endif %}>Assigned
+                    <option value="" {% if is_all %}selected{% endif %}>All Statuses</option>
+                    <option value="ASSIGNED" {% if is_assigned %}selected{% endif %}>Assigned
                     </option>
-                    <option value="IN_PROGRESS" {% if request.GET.status == 'IN_PROGRESS' %}selected{% endif %}>In
+                    <option value="IN_PROGRESS" {% if is_in_progress %}selected{% endif %}>In
                         Progress</option>
-                    <option value="COMPLETED" {% if request.GET.status == 'COMPLETED' %}selected{% endif %}>Completed
+                    <option value="COMPLETED" {% if is_completed %}selected{% endif %}>Completed
                     </option>
-                    <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled
+                    <option value="CANCELLED" {% if is_cancelled %}selected{% endif %}>Cancelled
                     </option>
                 </select>
 
@@ -273,6 +273,10 @@
 
                 <button type="submit" class="btn btn-sm btn-primary px-3 rounded-pill">
                     <i class="bi bi-filter"></i> Apply
+                </button>
+                <button type="submit" formaction="{% url 'task_pdf_report' %}"
+                    class="btn btn-sm btn-outline-danger px-3 rounded-pill">
+                    <i class="bi bi-file-earmark-pdf"></i> PDF
                 </button>
             </div>
         </div>
@@ -298,7 +302,7 @@
             </thead>
             <tbody>
                 {% for task in tasks %}
-                <tr onclick="window.location.href = '{% url 'admin_task_detail' task.pk %}'" style="cursor: pointer;">
+                <tr onclick="window.location.href = '{% url 'admin_task_detail' task.pk %}';" style="cursor: pointer;">
                     <td>
                         <span class="task-id">
                             #{{ task.id }}

@@ -14,6 +14,7 @@ urlpatterns = [
     path('tasks/<int:pk>/cancel/', views.TaskCancelView.as_view(), name='task_cancel'),
     path('tasks/<int:pk>/reset/', views.TaskResetView.as_view(), name='task_reset'),
     path('tasks/export/', views.ExportTasksView.as_view(), name='task_export'),
+    path('tasks/pdf/', views.TaskPDFView.as_view(), name='task_pdf_report'),
     
     # Driver Management (Admin)
     path('drivers/', views.DriverListView.as_view(), name='driver_list'),
